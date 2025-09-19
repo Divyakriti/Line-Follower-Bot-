@@ -33,7 +33,3 @@ This project is a **Line Follower Robot** built using an Arduino UNO and an **HW
 2. Arduino UNO reads the sensor values.
 3. HW-130 Motor Driver Shield drives the DC motors.
 4. Robot adjusts movement to follow the path smoothly.
-
----
-
-Do you also want me to **write the Arduino code (for HW-130 motor driver + 5 IR sensors)** and include it in this README so your GitHub repo is plug-and-play?
