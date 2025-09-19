@@ -1,0 +1,108 @@
+#include <AFMotor.h>
+
+// Motor setup
+AF_DCMotor M_l(1, MOTOR12_1KHZ);
+AF_DCMotor M_r(3, MOTOR34_1KHZ);
+
+// IR sensor pins (A0–A4 = 14 to 18)
+int irPins[5] = {14, 15, 17, 18, 19};
+int weights[5] = {2,1,0,-1,-2};
+
+int baseSpeed = 100;
+float Kp = 30;
+float Kd = 18;
+
+void setup() {
+  Serial.begin(9600);
+  for (int i = 0; i < 5; i++) {
+    pinMode(irPins[i], INPUT);
+   
+  }
+}
+
+void loop() {
+  int numerator = 0;
+  int denominator = 0;
+  float pid = 0;
+  float error = 0;
+  float prev_error = 0;
+  float integral = 0;
+
+  Serial.print("IR Values: ");
+  for (int i = 0; i < 5; i++) {
+    int sensorValue = digitalRead(irPins[i]);
+    Serial.print((irPins[i]));
+    Serial.print(" ");
+    Serial.print(sensorValue);
+    Serial.print(" ");
+    numerator += sensorValue * weights[i];
+    denominator += sensorValue;
+   
+   
+  }
+  Serial.print("numerator: ");
+  Serial.print(" ");
+  Serial.print(numerator); 
+  Serial.print(" ");
+  Serial.print("denominator:");
+  Serial.print(" ");
+  Serial.print(numerator);
+  Serial.print(" ");
+  // Avoid division by zero
+  if (denominator == 0) {
+    numerator =0;
+    denominator = 0;
+    error = 0;
+    pid = 0;
+    // No line detected
+  } else {
+    error = (float)numerator / denominator;
+    float derivative = error - prev_error;
+     pid = Kp * error + Kd * derivative;
+  }
+ if (numerator == 0) {
+  numerator =0;
+    denominator = 0;
+    error = 0;
+    pid = 0;
+  error = 0;
+  pid = 0;
+ }
+  else { error = (float)numerator / denominator;
+    float derivative = error - prev_error;
+     pid = Kp * error + Kd * derivative;
+ }
+  Serial.print("previous errror:");
+  Serial.print(prev_error);
+  Serial.print(" ");
+  if (pid == 0) {
+    int leftSpeed = 0;
+    int rightSpeed = 0;
+  }
+  int leftSpeed = baseSpeed - pid;
+  int rightSpeed = baseSpeed + pid;
+
+  // Limit speeds
+  leftSpeed = constrain(leftSpeed, 0, 255);
+  rightSpeed = constrain(rightSpeed, 0, 255);
+
+  // Motor control
+  M_l.setSpeed(rightSpeed);
+  M_r.setSpeed(leftSpeed);
+  M_l.run(FORWARD);
+  M_r.run(FORWARD);
+
+  // Print debug info
+  Serial.print(" | Error: ");
+  Serial.print(error);
+  Serial.print(" | PID: ");
+  Serial.print(pid);
+  Serial.print(" | Left Speed: ");
+  Serial.print(leftSpeed);
+  Serial.print(" | Right Speed: ");
+  Serial.println(rightSpeed);
+
+  prev_error = error;
+
+  // Small delay for readability
+}
